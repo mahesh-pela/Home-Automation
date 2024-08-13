@@ -1,39 +1,32 @@
-import 'package:flutter/material.dart';
-import 'package:home_automation/Controller/bluetoothController.dart';
-import 'package:home_automation/Screens/dashBoard.dart';
+import 'package:flutter/material.dart'
+    show BuildContext, MaterialApp, StatelessWidget, Widget, runApp;
+import 'package:home_automation/SelecionarDispositivoPage.dart';
+import 'package:home_automation/main.dart';
+import 'package:provider/provider.dart';
+import 'package:home_automation/provider/status.dart';
+
+import 'HomePage.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'LED Bluetooth',
-      home: BluetoothApp(),
-    );
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider<StatusConexaoProvider>.value(
+              value: StatusConexaoProvider()),
+        ],
+        child: MaterialApp(
+          title: 'Xerocasa',
+          initialRoute: '/',
+          routes: {
+            '/': (context) => HomePage(),
+            '/selectDevice': (context) => const SelecionarDispositivoPage(),
+          },
+        ));
   }
 }
-
-// class BluetoothScreen extends StatefulWidget {
-//   @override
-//   _BluetoothScreenState createState() => _BluetoothScreenState();
-// }
-
-// class _BluetoothScreenState extends State<BluetoothScreen> {
-//   FlutterBlue flutterBlue = FlutterBlue.instance;
-//   ScanResult targetDevice;
-//
-//   List<ScanResult> scanResults = await flutterBlue.startScan();
-//
-//
-//
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold();
-//   }
-//
-// }
