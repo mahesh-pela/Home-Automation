@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   flutter_blue_plus: ^1.32.11
   get: ^4.6.6
+  flutter_bluetooth_serial: ^0.4.0
 
 dev_dependencies:
   flutter_test:

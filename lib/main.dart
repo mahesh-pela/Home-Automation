@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:home_automation/Controller/bluetoothController.dart';
+import 'package:home_automation/Screens/dashBoard.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'LED Bluetooth',
-      home: Bluetoothcontroller(),
+      home: Dashboard(),
     );
   }
 }
