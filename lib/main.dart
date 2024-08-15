@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_automation/Screens/dashboard.dart';
 import 'Screens/HomePage.dart';
 
 void main() {
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: Dashboard(),
     );
   }
 }
