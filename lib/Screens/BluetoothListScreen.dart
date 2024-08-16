@@ -1,18 +1,20 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+class Bluetoothlistscreen extends StatefulWidget {
+  const Bluetoothlistscreen({super.key});
 
   @override
-  State<Dashboard> createState() => _DashboardState();
+  State<Bluetoothlistscreen> createState() => _Bluetoothlistscreen();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _Bluetoothlistscreen extends State<Bluetoothlistscreen> {
   bool isSwitch = false;
-  // String textValue = 'Bluetooth is Off';
   List<BluetoothDevice> _devicesList = [];
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
 
@@ -26,7 +28,6 @@ class _DashboardState extends State<Dashboard> {
     _bluetoothState = await FlutterBluetoothSerial.instance.state;
     setState(() {
       isSwitch = _bluetoothState == BluetoothState.STATE_ON;
-      // textValue = isSwitch ? 'Bluetooth is On' : 'Bluetooth is Off';
       if (isSwitch) {
         _startBluetoothScan();
       } else {
@@ -95,10 +96,51 @@ class _DashboardState extends State<Dashboard> {
   void toggleSwitch(bool value) {
     setState(() {
       isSwitch = value;
-      // textValue = isSwitch ? 'Bluetooth is On' : 'Bluetooth is Off';
     });
     _toggleBluetooth(value);
   }
+
+  Future<void> _connectToDevice(BluetoothDevice device) async {
+    try {
+      // Show loading indicator or feedback to the user
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: Text('Connecting...'),
+          content: CircularProgressIndicator(),
+        ),
+      );
+
+      // Attempt to connect
+      await FlutterBluetoothSerial.instance.connect(device).timeout(
+        Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Connection timed out');
+        },
+      );
+
+      // Connection successful, navigate to the next screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DeviceConnectedScreen(device: device),
+        ),
+      );
+    } catch (e) {
+      // Handle connection error
+      print('Error connecting to device: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error connecting to device. Please try again.'),
+        ),
+      );
+    } finally {
+      // Dismiss loading indicator
+      Navigator.of(context).pop();
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -127,14 +169,80 @@ class _DashboardState extends State<Dashboard> {
           return ListTile(
             title: Text(device.name ?? "Unknown Device"),
             subtitle: Text(device.address),
-            onTap: () {
-              // Implement device selection
-            },
+            onTap: () => _connectToDevice(device),
           );
         },
       )
           : Center(
-        // child: Text(textValue),
+        child: Text('Bluetooth is Off'),
+      ),
+    );
+  }
+}
+
+class DeviceConnectedScreen extends StatefulWidget {
+  final BluetoothDevice device;
+
+  const DeviceConnectedScreen({super.key, required this.device});
+
+  @override
+  _DeviceConnectedScreenState createState() => _DeviceConnectedScreenState();
+}
+
+class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
+  BluetoothConnection? connection;
+
+  @override
+  void initState() {
+    super.initState();
+    _connect();
+  }
+
+  void _connect() async {
+    try {
+      connection = await BluetoothConnection.toAddress(widget.device.address);
+      print('Connected to the device');
+    } catch (e) {
+      print('Error connecting to the device: $e');
+    }
+  }
+
+  void _sendCommand(String command) async {
+    if (connection != null && connection!.isConnected) {
+      connection!.output.add(Utf8Encoder().convert(command));
+      await connection!.output.allSent;
+    }
+  }
+
+  @override
+  void dispose() {
+    connection?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Connected to ${widget.device.name ?? "Unknown Device"}'),
+      ),
+      body: Container(
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                _sendCommand('1'); // Send command to turn the LED on
+              },
+              child: Text('On'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _sendCommand('0'); // Send command to turn the LED off
+              },
+              child: Text('Off'),
+            ),
+          ],
+        ),
       ),
     );
   }
