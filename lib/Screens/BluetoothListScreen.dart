@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'DeviceConnectedScreen.dart';
 
 BluetoothConnection? globalConnection;
 
@@ -17,8 +15,10 @@ class BluetoothListScreen extends StatefulWidget {
 }
 
 class _BluetoothListScreenState extends State<BluetoothListScreen> {
+  //state variable to verify whether the bluetooth is on/off
   bool isSwitch = false;
   List<BluetoothDevice> _devicesList = [];
+  //hold the current state of the bluetooth
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
 
   @override
@@ -28,6 +28,7 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
     _setBluetoothOffInitially();
   }
 
+  //bluetooth state management(if bluetooth is on then it starts the scan else clears the list
   Future<void> _getBluetoothState() async {
     _bluetoothState = await FlutterBluetoothSerial.instance.state;
     setState(() {
@@ -40,6 +41,7 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
     });
   }
 
+  //requesting permission from the user
   Future<void> _requestPermissions() async {
     if (await Permission.bluetooth.isDenied) {
       await Permission.bluetooth.request();
@@ -77,6 +79,7 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
     }
   }
 
+  // list down the paired bluetooth devices
   Future<void> _startBluetoothScan() async {
     if (isSwitch) {
       _devicesList = await FlutterBluetoothSerial.instance.getBondedDevices();
@@ -84,6 +87,7 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
     }
   }
 
+  ///----------enable or disable bluetooth-----------
   Future<void> _toggleBluetooth(bool value) async {
     if (value) {
       await FlutterBluetoothSerial.instance.requestEnable();
@@ -95,6 +99,7 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
     await _checkBluetoothStateRepeatedly();
   }
 
+  ///-----checks the state of the bluetooth repeatedly
   Future<void> _checkBluetoothStateRepeatedly() async {
     while (true) {
       _bluetoothState = await FlutterBluetoothSerial.instance.state;
@@ -105,6 +110,7 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
       await Future.delayed(Duration(seconds: 1));
     }
   }
+
 
   void toggleSwitch(bool value) {
     setState(() {
@@ -177,48 +183,3 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
   }
 }
 
-class DeviceConnectedScreen extends StatelessWidget {
-  final BluetoothDevice device;
-
-  const DeviceConnectedScreen({super.key, required this.device});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Connected to ${device.name ?? "Unknown Device"}'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                await _sendMessageToBluetooth('1'); // Send '1' to turn on the LED
-              },
-              child: Text('ON'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await _sendMessageToBluetooth('0'); // Send '0' to turn off the LED
-              },
-              child: Text('OFF'),
-            ),
-            Text('Successfully connected to ${device.name ?? "Unknown Device"}'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _sendMessageToBluetooth(String message) async {
-    try {
-      if (globalConnection != null && globalConnection!.isConnected) {
-        globalConnection!.output.add(Uint8List.fromList(utf8.encode(message)));
-        await globalConnection!.output.allSent;
-      }
-    } catch (e) {
-      print('Error sending message to device: $e');
-    }
-  }
-}
