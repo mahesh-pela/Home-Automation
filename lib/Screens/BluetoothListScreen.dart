@@ -1,19 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class Bluetoothlistscreen extends StatefulWidget {
-  const Bluetoothlistscreen({super.key});
+BluetoothConnection? globalConnection;
+
+class BluetoothListScreen extends StatefulWidget {
+  const BluetoothListScreen({super.key});
 
   @override
-  State<Bluetoothlistscreen> createState() => _Bluetoothlistscreen();
+  State<BluetoothListScreen> createState() => _BluetoothListScreenState();
 }
 
-class _Bluetoothlistscreen extends State<Bluetoothlistscreen> {
+class _BluetoothListScreenState extends State<BluetoothListScreen> {
   bool isSwitch = false;
   List<BluetoothDevice> _devicesList = [];
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
@@ -22,6 +25,7 @@ class _Bluetoothlistscreen extends State<Bluetoothlistscreen> {
   void initState() {
     super.initState();
     _requestPermissions();
+    _setBluetoothOffInitially();
   }
 
   Future<void> _getBluetoothState() async {
@@ -63,6 +67,16 @@ class _Bluetoothlistscreen extends State<Bluetoothlistscreen> {
     await _getBluetoothState();
   }
 
+  Future<void> _setBluetoothOffInitially() async {
+    _bluetoothState = await FlutterBluetoothSerial.instance.state;
+    if (_bluetoothState == BluetoothState.STATE_ON) {
+      await FlutterBluetoothSerial.instance.requestDisable();
+      setState(() {
+        isSwitch = false;
+      });
+    }
+  }
+
   Future<void> _startBluetoothScan() async {
     if (isSwitch) {
       _devicesList = await FlutterBluetoothSerial.instance.getBondedDevices();
@@ -77,7 +91,6 @@ class _Bluetoothlistscreen extends State<Bluetoothlistscreen> {
       await FlutterBluetoothSerial.instance.requestDisable();
     }
 
-    // Poll for Bluetooth state change
     await Future.delayed(Duration(seconds: 2));
     await _checkBluetoothStateRepeatedly();
   }
@@ -102,45 +115,29 @@ class _Bluetoothlistscreen extends State<Bluetoothlistscreen> {
 
   Future<void> _connectToDevice(BluetoothDevice device) async {
     try {
-      // Show loading indicator or feedback to the user
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: Text('Connecting...'),
-          content: CircularProgressIndicator(),
-        ),
-      );
-
-      // Attempt to connect
-      await FlutterBluetoothSerial.instance.connect(device).timeout(
-        Duration(seconds: 10),
+      globalConnection = await BluetoothConnection.toAddress(device.address).timeout(
+        Duration(seconds: 20), // Increased timeout
         onTimeout: () {
-          throw TimeoutException('Connection timed out');
+          throw TimeoutException("Connection timeout!");
         },
       );
-
-      // Connection successful, navigate to the next screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DeviceConnectedScreen(device: device),
-        ),
-      );
+      if (globalConnection!.isConnected) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DeviceConnectedScreen(device: device),
+          ),
+        );
+        print('Connected to ${device.name}');
+      }
     } catch (e) {
-      // Handle connection error
       print('Error connecting to device: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error connecting to device. Please try again.'),
-        ),
-      );
-    } finally {
-      // Dismiss loading indicator
-      Navigator.of(context).pop();
+      // Retry logic
+      Future.delayed(Duration(seconds: 5), () {
+        _connectToDevice(device); // Retry after 5 seconds
+      });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -180,70 +177,48 @@ class _Bluetoothlistscreen extends State<Bluetoothlistscreen> {
   }
 }
 
-class DeviceConnectedScreen extends StatefulWidget {
+class DeviceConnectedScreen extends StatelessWidget {
   final BluetoothDevice device;
 
   const DeviceConnectedScreen({super.key, required this.device});
 
   @override
-  _DeviceConnectedScreenState createState() => _DeviceConnectedScreenState();
-}
-
-class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
-  BluetoothConnection? connection;
-
-  @override
-  void initState() {
-    super.initState();
-    _connect();
-  }
-
-  void _connect() async {
-    try {
-      connection = await BluetoothConnection.toAddress(widget.device.address);
-      print('Connected to the device');
-    } catch (e) {
-      print('Error connecting to the device: $e');
-    }
-  }
-
-  void _sendCommand(String command) async {
-    if (connection != null && connection!.isConnected) {
-      connection!.output.add(Utf8Encoder().convert(command));
-      await connection!.output.allSent;
-    }
-  }
-
-  @override
-  void dispose() {
-    connection?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Connected to ${widget.device.name ?? "Unknown Device"}'),
+        title: Text('Connected to ${device.name ?? "Unknown Device"}'),
       ),
-      body: Container(
+      body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () {
-                _sendCommand('1'); // Send command to turn the LED on
+              onPressed: () async {
+                await _sendMessageToBluetooth('1'); // Send '1' to turn on the LED
               },
-              child: Text('On'),
+              child: Text('ON'),
             ),
             ElevatedButton(
-              onPressed: () {
-                _sendCommand('0'); // Send command to turn the LED off
+              onPressed: () async {
+                await _sendMessageToBluetooth('0'); // Send '0' to turn off the LED
               },
-              child: Text('Off'),
+              child: Text('OFF'),
             ),
+            Text('Successfully connected to ${device.name ?? "Unknown Device"}'),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _sendMessageToBluetooth(String message) async {
+    try {
+      if (globalConnection != null && globalConnection!.isConnected) {
+        globalConnection!.output.add(Uint8List.fromList(utf8.encode(message)));
+        await globalConnection!.output.allSent;
+      }
+    } catch (e) {
+      print('Error sending message to device: $e');
+    }
   }
 }
