@@ -1,10 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-
+import 'package:porcupine_flutter/porcupine_manager.dart'; // Updated import
 import 'BluetoothListScreen.dart';
 
 class DeviceConnectedScreen extends StatefulWidget {
@@ -18,6 +17,7 @@ class DeviceConnectedScreen extends StatefulWidget {
 
 class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   late stt.SpeechToText _speech;
+  PorcupineManager? _porcupineManager;
   bool _isListening = false;
   String _command = '';
 
@@ -25,79 +25,20 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
+    _initializePorcupine();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Connected to ${widget.device.name ?? "Unknown Device"}'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _sendMessageToBluetooth('1'); // Send '1' to turn on the LED
-                      },
-                      child: Text('ON'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _sendMessageToBluetooth('0'); // Send '0' to turn off the LED
-                      },
-                      child: Text('OFF'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 30,),
-            Container(
-              width: 120,
-              height: 120,
-              child: Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: GestureDetector(
-                  onTap: _listen,
-                  child: Image.asset('assets/icons/microphone.png'),
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              _command,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Sends message to the Bluetooth to control the LED
-  Future<void> _sendMessageToBluetooth(String message) async {
+  void _initializePorcupine() async {
     try {
-      if (globalConnection != null && globalConnection!.isConnected) {
-        globalConnection!.output.add(Uint8List.fromList(utf8.encode(message)));
-        await globalConnection!.output.allSent;
-      }
+      _porcupineManager = await PorcupineManager.fromKeywordPaths(
+        'RhbtYL5hH2nqlT90Dx5E7Zqx1vUFEDOV+AUZvDWZpPbF3BpYHdSThQ==', // Access key
+        ['assets/hey_lyra.ppn'],// Replace with your wake word model
+        _listen as WakeWordCallback, // Callback when wake word is detected
+      );
+
+      await _porcupineManager?.start(); // Start Porcupine detection
     } catch (e) {
-      print('Error sending message to device: $e');
+      print('Porcupine initialization error: $e');
     }
   }
 
@@ -124,4 +65,72 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     }
   }
 
+  Future<void> _sendMessageToBluetooth(String message) async {
+    try {
+      if (globalConnection != null && globalConnection!.isConnected) {
+        globalConnection!.output.add(Uint8List.fromList(utf8.encode(message)));
+        await globalConnection!.output.allSent;
+      }
+    } catch (e) {
+      print('Error sending message to device: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Connected to ${widget.device.name ?? "Unknown Device"}'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _sendMessageToBluetooth('1');
+                      },
+                      child: Text('ON'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _sendMessageToBluetooth('0');
+                      },
+                      child: Text('OFF'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 30,),
+            GestureDetector(
+              onTap: _listen, // Optionally, if you still want manual control
+              child: Image.asset('assets/icons/microphone.png'),
+            ),
+            SizedBox(height: 20),
+            Text(
+              _command,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _porcupineManager?.stop(); // Stop Porcupine detection
+    super.dispose();
+  }
 }
