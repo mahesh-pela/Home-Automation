@@ -111,9 +111,9 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
         setState(() => _isListening = true);
         _speech.listen(onResult: (val) => setState(() {
           _command = val.recognizedWords.toLowerCase();
-          if (_command.contains('turn on the light')) {
+          if (_command.contains('turn on light')) {
             _sendMessageToBluetooth('1'); // Turn on the LED
-          } else if (_command.contains('turn off the light')) {
+          } else if (_command.contains('turn off light')) {
             _sendMessageToBluetooth('0'); // Turn off the LED
           }
         }));
@@ -123,4 +123,5 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
       _speech.stop();
     }
   }
+
 }
