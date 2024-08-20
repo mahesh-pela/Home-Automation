@@ -41,7 +41,7 @@ dependencies:
   scoped_model: ^2.0.0
   flutter_speech: ^2.0.0
   speech_to_text: ^6.6.2
-  porcupine_flutter: ^3.0.3
+  picovoice_flutter: ^3.0.3
 
 dev_dependencies:
   flutter_test:
