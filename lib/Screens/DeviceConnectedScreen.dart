@@ -1,6 +1,9 @@
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:home_automation/constants/color.dart';
 import 'dart:convert';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:typed_data';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:porcupine_flutter/porcupine_manager.dart';
@@ -30,15 +33,23 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
 
   void _initializePorcupine() async {
     try {
-      final String accessKey = "RhbtYL5hH2nqlT90Dx5E7Zqx1vUFEDOV+AUZvDWZpPbF3BpYHdSThQ==";
-      _porcupineManager = await PorcupineManager.fromKeywordPaths(
-        accessKey, // Access key
-        ['assets/hey_lyra.ppn'], // Replace with your wake word model path
-        _onWakeWordDetected, // Callback when wake word is detected
-        sensitivities: [0.5], // Sensitivity level (optional)
-      );
-      await _porcupineManager?.start(); // Start Porcupine detection
-      print('Porcupine started successfully');
+      final String accessKey = "Jc8x3U2volT5tY7b7miqp5j4N4T8pq6lTdhMwMCVK0SqDxe7yui32A==";
+
+      // Check and request microphone permission
+      if (await Permission.microphone.request().isGranted) {
+        // Load the wake word model from the assets
+        _porcupineManager = await PorcupineManager.fromKeywordPaths(
+          accessKey, // Access key
+          ['assets/hey_lyra.ppn'], // Path to your wake word model in the assets folder
+          _onWakeWordDetected, // Callback when wake word is detected
+          sensitivities: [0.5], // Sensitivity level (optional)
+        );
+
+        await _porcupineManager?.start(); // Start Porcupine detection
+        print('Porcupine started successfully');
+      } else {
+        print('Microphone permission denied');
+      }
     } catch (e) {
       print('Porcupine initialization error: $e');
     }
@@ -52,23 +63,40 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   void _listen() async {
     if (!_isListening) {
       bool available = await _speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
-        onError: (val) => print('onError: $val'),
+        onStatus: (val) {
+          print('onStatus: $val');
+          if (val == 'notListening') {
+            setState(() => _isListening = false); // Stop animating when not listening
+          }
+        },
+        onError: (val) {
+          print('onError: $val');
+          setState(() => _isListening = false); // Stop animating on error
+        },
       );
       if (available) {
-        setState(() => _isListening = true);
-        _speech.listen(onResult: (val) => setState(() {
-          _command = val.recognizedWords.toLowerCase();
-          print('Command recognized: $_command');
-          if (_command.contains('turn on light')) {
-            _sendMessageToBluetooth('1'); // Turn on the LED
-          } else if (_command.contains('turn off light')) {
-            _sendMessageToBluetooth('0'); // Turn off the LED
-          }
-        }));
+        setState(() => _isListening = true); // Start animating when listening
+        _speech.listen(onResult: (val) {
+          setState(() {
+            _command = val.recognizedWords.toLowerCase();
+            print('Command recognized: $_command');
+            if (_command.contains('turn on light')) {
+              _sendMessageToBluetooth('1'); // Turn on the LED
+            } else if (_command.contains('turn off light')) {
+              _sendMessageToBluetooth('0'); // Turn off the LED
+            }
+          });
+
+          // After processing the command, reset the _command to an empty string
+          Future.delayed(Duration(seconds: 2), () {
+            setState(() {
+              _command = ''; // Clear the command after 2 seconds
+            });
+          });
+        });
       }
     } else {
-      setState(() => _isListening = false);
+      setState(() => _isListening = false); // Stop animating when stopped
       _speech.stop();
     }
   }
@@ -87,13 +115,33 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 30),
+        child: AvatarGlow(
+          animate: _isListening,
+          duration: Duration(milliseconds: 2000),
+          glowColor: bgColor,
+          repeat: true,
+          child: GestureDetector(
+            onTap: _listen,
+            child: CircleAvatar(
+              backgroundColor: bgColor,
+              radius: 35,
+              child: Icon(_isListening? Icons.mic: Icons.mic_none, color: Colors.white,),
+            ),
+          ),
+        ),
+      ),
       appBar: AppBar(
         title: Text('Connected to ${widget.device.name ?? "Unknown Device"}'),
       ),
-      body: Padding(
+
+      ///----------------------------///
+      body: Container(
         padding: const EdgeInsets.all(20),
+        margin: EdgeInsets.only(bottom: 150),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Card(
               elevation: 10,
@@ -120,10 +168,6 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
               ),
             ),
             SizedBox(height: 30),
-            GestureDetector(
-              onTap: _listen, // Optionally, if you still want manual control
-              child: Image.asset('assets/icons/microphone.png'),
-            ),
             SizedBox(height: 20),
             Text(
               _command,

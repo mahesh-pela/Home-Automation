@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:home_automation/constants/color.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'DeviceConnectedScreen.dart';
 
@@ -149,10 +150,10 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: bgColor,
         title: Text(
           'Home Automation',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400, color: CupertinoColors.white),
         ),
         actions: [
           Switch(
