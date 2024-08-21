@@ -40,7 +40,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
         // Load the wake word model from the assets
         _porcupineManager = await PorcupineManager.fromKeywordPaths(
           accessKey, // Access key
-          ['assets/hey_lyra.ppn'], // Path to your wake word model in the assets folder
+          ['assets/hey-lyra_en_android_v3_0_0.ppn'], // Path to your wake word model in the assets folder
           _onWakeWordDetected, // Callback when wake word is detected
           sensitivities: [0.5], // Sensitivity level (optional)
         );

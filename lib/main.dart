@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:home_automation/Screens/BluetoothListScreen.dart';
-import 'Screens/HomePage.dart';
 
 void main() {
   runApp(const MyApp());
