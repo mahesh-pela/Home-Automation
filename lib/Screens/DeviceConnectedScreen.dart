@@ -147,32 +147,13 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
               elevation: 10,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _sendMessageToBluetooth('1');
-                      },
-                      child: Text('ON'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _sendMessageToBluetooth('0');
-                      },
-                      child: Text('OFF'),
-                    ),
-                  ],
-                ),
-              ),
             ),
             SizedBox(height: 30),
             SizedBox(height: 20),
-            Text(
-              _command,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            // Text(
+            //   _command,
+            //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            // ),
           ],
         ),
       ),
