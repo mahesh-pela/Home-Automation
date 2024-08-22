@@ -1,6 +1,7 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:home_automation/Screens/DashboardScreen.dart';
 import 'package:home_automation/constants/color.dart';
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
@@ -138,25 +139,26 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
       ),
 
       ///----------------------------///
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        margin: EdgeInsets.only(bottom: 150),
-        child: Column(
-          children: [
-            Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            SizedBox(height: 30),
-            SizedBox(height: 20),
-            // Text(
-            //   _command,
-            //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            // ),
-          ],
-        ),
-      ),
+      // body: Container(
+      //   padding: const EdgeInsets.all(20),
+      //   margin: EdgeInsets.only(bottom: 150),
+      //   child: Column(
+      //     children: [
+      //       Card(
+      //         elevation: 10,
+      //         shape: RoundedRectangleBorder(
+      //             borderRadius: BorderRadius.circular(10)),
+      //       ),
+      //       SizedBox(height: 30),
+      //       SizedBox(height: 20),
+      //       // Text(
+      //       //   _command,
+      //       //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      //       // ),
+      //     ],
+      //   ),
+      // ),
+      body: Dashboardscreen(),
     );
   }
 
