@@ -25,14 +25,14 @@ class _DashboardscreenState extends State<Dashboardscreen> {
               controller: txtName,
               decoration: InputDecoration(hintText: 'Enter Name'),
             ),
-            
+
             actions: <Widget>[
               ElevatedButton(
                   onPressed: (){
                     Navigator.pop(context);
-                  }, 
+                  },
                   child: Text('Cancel')),
-              
+
               ElevatedButton(
                   onPressed: (){
                     setState(() {
