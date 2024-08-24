@@ -37,14 +37,17 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                   onPressed: (){
                     setState(() {
                       _cards.add(
-                        Card(
-                          elevation: 10,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.room)
-                              Text(txtName.text, style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600 ),),
-                            ],
+                        GestureDetector(
+                          child: Card(
+                            elevation: 10,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ImageIcon(AssetImage('assets/icons/room.png')),
+                                SizedBox(width: 10,),
+                                Text(txtName.text, style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600 ),),
+                              ],
+                            ),
                           ),
                         )
                       );
