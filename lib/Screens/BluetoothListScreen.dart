@@ -129,7 +129,7 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
         },
       );
       if (globalConnection!.isConnected) {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => DeviceConnectedScreen(device: device),

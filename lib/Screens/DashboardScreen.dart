@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:home_automation/Screens/Devices.dart';
 
 class Dashboardscreen extends StatefulWidget {
   const Dashboardscreen({super.key});
@@ -38,6 +39,9 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                     setState(() {
                       _cards.add(
                         GestureDetector(
+                          onTap: (){
+                            navigateToDevices(txtName.text);
+                          },
                           child: Card(
                             elevation: 10,
                             child: Row(
@@ -58,6 +62,12 @@ class _DashboardscreenState extends State<Dashboardscreen> {
           );
         });
   }
+
+  ///-----navigator-------
+  void navigateToDevices(String roomName){
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>Devices(roomName: roomName)));
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,5 +86,8 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         child: Icon(Icons.add, color: Colors.white, size: 30,),
       ),
     );
+
   }
 }
+
+
