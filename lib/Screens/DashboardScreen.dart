@@ -39,7 +39,13 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                       _cards.add(
                         Card(
                           elevation: 10,
-                          child: Center(child: Text(txtName.text, style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600 ),)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.room)
+                              Text(txtName.text, style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600 ),),
+                            ],
+                          ),
                         )
                       );
                     });
