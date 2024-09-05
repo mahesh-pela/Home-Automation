@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:home_automation/Screens/BluetoothListScreen.dart';
+import 'package:home_automation/Screens/DashboardScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
       ),
       home: BluetoothListScreen(),
     );
+
   }
 }
 

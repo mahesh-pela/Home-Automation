@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:home_automation/Screens/Devices.dart';
+import 'package:home_automation/constants/textStyle.dart';
 
 class Dashboardscreen extends StatefulWidget {
   const Dashboardscreen({super.key});
@@ -10,84 +13,113 @@ class Dashboardscreen extends StatefulWidget {
 }
 
 class _DashboardscreenState extends State<Dashboardscreen> {
-  //empty list
-  List<Widget> _cards = [];
-
-  ///-----------this will trigger when clicked on the floating action button--------
-  void addCardWithName(){
-    TextEditingController txtName = TextEditingController();
-
-    showDialog(
-        context: context,
-        builder: (BuildContext context){
-          return AlertDialog(
-            title: Text('Add Room'),
-            content: TextField(
-              controller: txtName,
-              decoration: InputDecoration(hintText: 'Enter Name'),
-            ),
-
-            actions: <Widget>[
-              ElevatedButton(
-                  onPressed: (){
-                    Navigator.pop(context);
-                  },
-                  child: Text('Cancel')),
-
-              ElevatedButton(
-                  onPressed: (){
-                    setState(() {
-                      _cards.add(
-                        GestureDetector(
-                          onTap: (){
-                            navigateToDevices(txtName.text);
-                          },
-                          child: Card(
-                            elevation: 10,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ImageIcon(AssetImage('assets/icons/room.png')),
-                                SizedBox(width: 10,),
-                                Text(txtName.text, style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600 ),),
-                              ],
-                            ),
-                          ),
-                        )
-                      );
-                    });
-                    Navigator.pop(context);
-              }, child: Text('Add'))
-            ],
-          );
-        });
-  }
-
-  ///-----navigator-------
-  void navigateToDevices(String roomName){
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>Devices(roomName: roomName)));
-
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(15),
-        child: GridView.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          children: _cards
-        ),
-        ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addCardWithName,
+      backgroundColor: Colors.white,
+      appBar: AppBar(
         backgroundColor: Colors.blue,
-        child: Icon(Icons.add, color: Colors.white, size: 30,),
+        title: Text(
+          'Devices',
+          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 23, color: Colors.white),
+        ),
+      ),
+
+      body: ListView(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        children: [
+          RoomSection(
+              title: 'Living Room',
+              devices: [
+                DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'Living Room'),
+                DeviceCard(icon: FontAwesomeIcons.fan, label: 'Fan', subLabel: 'Living Room',)
+              ]),
+
+          RoomSection(
+              title: 'BedRoom',
+              devices: [
+                DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'BedRoom'),
+                DeviceCard(icon: CupertinoIcons.tv, label: "Smart TV", subLabel: 'Bedroom')
+              ]),
+
+          RoomSection(
+              title: 'Dining Room',
+              devices: [
+                DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'DiningRoom'),
+                DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'Dining Room')
+              ])
+        ],
       ),
     );
-
   }
+}
+
+class RoomSection extends StatelessWidget{
+  final String title;
+  final List<DeviceCard> devices;
+  RoomSection({super.key, required this.title, required this.devices});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 20,),
+        Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+        SizedBox(height: 10,),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: devices.map((device)=>Expanded(child: device)).toList(),
+        )
+      ],
+    );
+  }}
+
+
+class DeviceCard extends StatefulWidget{
+  final IconData icon;
+  final String label;
+  final String subLabel;
+
+  const DeviceCard({super.key, required this.icon, required this.label, required this.subLabel});
+  @override
+  State<DeviceCard> createState() => _DeviceCardState();
+
+}
+
+class _DeviceCardState extends State<DeviceCard>{
+  bool isSwitched = false;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Color(0xFFE7F0F8),
+        borderRadius: BorderRadius.circular(15)
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(widget.icon, size: 40, color: Colors.black87,),
+          SizedBox(height: 10,),
+          Text(widget.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+          SizedBox(height: 10,),
+          Text(widget.subLabel, style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500),),
+          SizedBox(height: 10,),
+          CupertinoSwitch(
+              value: isSwitched,
+              onChanged: (value){
+                setState(() {
+                  isSwitched = value;
+                });
+              }
+          )
+        ],
+      ),
+    );
+  }
+
 }
 
 
