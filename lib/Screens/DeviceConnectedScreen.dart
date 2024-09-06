@@ -1,7 +1,6 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:home_automation/Screens/DashboardScreen.dart';
 import 'package:home_automation/constants/color.dart';
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
@@ -62,17 +61,22 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   }
 
   void _listen() async {
+    //stop porcupine to free up the microphone for speech recognition
+    await _porcupineManager?.stop();
+
     if (!_isListening) {
       bool available = await _speech.initialize(
         onStatus: (val) {
           print('onStatus: $val');
           if (val == 'notListening') {
-            setState(() => _isListening = false); // Stop animating when not listening
+            setState(() => _isListening = false);// Stop animating when not listening
+            _restartPorcupine();  //restart porcupine after speech recognition ends
           }
         },
         onError: (val) {
           print('onError: $val');
           setState(() => _isListening = false); // Stop animating on error
+          _restartPorcupine();
         },
       );
       if (available) {
@@ -99,6 +103,17 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     } else {
       setState(() => _isListening = false); // Stop animating when stopped
       _speech.stop();
+      _restartPorcupine();
+    }
+  }
+
+  //restart Porcupine Code
+  void _restartPorcupine() async{
+    try{
+      await _porcupineManager?.start();
+      print('Porcupine restarted Successfully');
+    }catch(e){
+      print('Error restarting Porcupine: $e');
     }
   }
 
@@ -135,30 +150,50 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
         ),
       ),
       appBar: AppBar(
-        title: Text('Connected to ${widget.device.name ?? "Unknown Device"}'),
+        backgroundColor: Colors.blue,
+        title: Text('Devices', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 23, color: Colors.white)),
+            // Text('Connected to ${widget.device.name ?? "Unknown Device"}'),
       ),
 
       ///----------------------------///
-      // body: Container(
-      //   padding: const EdgeInsets.all(20),
-      //   margin: EdgeInsets.only(bottom: 150),
-      //   child: Column(
-      //     children: [
-      //       Card(
-      //         elevation: 10,
-      //         shape: RoundedRectangleBorder(
-      //             borderRadius: BorderRadius.circular(10)),
-      //       ),
-      //       SizedBox(height: 30),
-      //       SizedBox(height: 20),
-      //       // Text(
-      //       //   _command,
-      //       //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      //       // ),
-      //     ],
-      //   ),
-      // ),
-      body: Dashboardscreen(),
+      body: Container(
+        padding: const EdgeInsets.all(20),
+        margin: EdgeInsets.only(bottom: 150),
+        child: Column(
+          children: [
+            Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _sendMessageToBluetooth('1');
+                      },
+                      child: Text('ON'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _sendMessageToBluetooth('0');
+                      },
+                      child: Text('OFF'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
+            SizedBox(height: 20),
+            Text(
+              _command,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
