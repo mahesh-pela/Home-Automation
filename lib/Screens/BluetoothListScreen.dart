@@ -93,7 +93,12 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
     if (value) {
       await FlutterBluetoothSerial.instance.requestEnable();
     } else {
-      await FlutterBluetoothSerial.instance.requestDisable();
+      // Ensure to disconnect any existing connections
+      if(globalConnection != null && globalConnection!.isConnected){
+        await globalConnection!.close();
+        globalConnection = null; //reset the global connection
+      }
+      await FlutterBluetoothSerial.instance.requestDisable();  //disable bluetooth
     }
 
     await Future.delayed(Duration(seconds: 2));
@@ -156,30 +161,70 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400, color: CupertinoColors.white),
         ),
         actions: [
-          Switch(
-            value: isSwitch,
-            onChanged: toggleSwitch,
-            activeColor: CupertinoColors.white,
-            activeTrackColor: Colors.orange,
-            inactiveTrackColor: Colors.grey.shade300,
+          ///-----Button to skip the connecting process----/////
+          TextButton(
+            onPressed: () {
+              BluetoothDevice dummyDevice = BluetoothDevice(
+                address: '00:00:00:00:00:00',
+                name: 'Dummy Device',
+              );
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DeviceConnectedScreen(device: dummyDevice),
+                ),
+              );
+            },
+            child: Text(
+              'Skip',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
           )
         ],
       ),
-      body: isSwitch
-          ? ListView.builder(
-        itemCount: _devicesList.length,
-        itemBuilder: (context, index) {
-          BluetoothDevice device = _devicesList[index];
-          return ListTile(
-            title: Text(device.name ?? "Unknown Device"),
-            subtitle: Text(device.address),
-            onTap: () => _connectToDevice(device),
-          );
-        },
-      )
-          : Center(
-        child: Text('Bluetooth is Off'),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Bluetooth', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),),
+                Switch(
+                  value: isSwitch,
+                  onChanged: toggleSwitch,
+                  activeColor: CupertinoColors.white,
+                  activeTrackColor: Colors.blueAccent,
+                  inactiveTrackColor: Colors.grey.shade100,
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: isSwitch
+                    ? ListView.builder(
+                  itemCount: _devicesList.length,
+                  itemBuilder: (context, index) {
+                    BluetoothDevice device = _devicesList[index];
+                    return ListTile(
+                      title: Text(device.name ?? "Unknown Device"),
+                      subtitle: Text(device.address),
+                      onTap: () => _connectToDevice(device),
+                    );
+                  },
+                )
+                    : Center(
+                  child: Text('Bluetooth is Off'),
+                ),
+          ),
+        ],
       ),
+
+
+
     );
   }
 }

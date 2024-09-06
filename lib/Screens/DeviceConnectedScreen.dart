@@ -12,15 +12,18 @@ import 'package:porcupine_flutter/porcupine_manager.dart';
 import 'BluetoothListScreen.dart';
 
 class DeviceConnectedScreen extends StatefulWidget {
-  final BluetoothDevice device;
+  final BluetoothDevice? device;
 
-  const DeviceConnectedScreen({super.key, required this.device});
+  const DeviceConnectedScreen({super.key, this.device});
 
   @override
   _DeviceConnectedScreenState createState() => _DeviceConnectedScreenState();
 }
 
 class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
+  // Access the BluetoothDevice Object if provided
+  BluetoothDevice? get device => widget.device;
+
   late stt.SpeechToText _speech;
   PorcupineManager? _porcupineManager;
   bool _isListening = false;
@@ -129,6 +132,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     }
   }
 
+  ///------- custom functions for controlling the devices for the rooms ------------///
   void _handleLivingRoomLight(bool isSwitched) {
     // Send the message to Bluetooth device when switch is toggled
     if (isSwitched) {
@@ -166,7 +170,16 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
       ),
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: Text('Devices', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 23, color: Colors.white)),
+        // title: Text('Devices', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 23, color: Colors.white)),
+        title: Text('Devices',style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BluetoothListScreen()));
+            },
+              ///---- showing the bluetooth icon based on the connection status------///
+            icon: Icon(globalConnection != null && globalConnection!.isConnected? Icons.bluetooth_connected : Icons.bluetooth, color: Colors.white,))
+        ],
       ),
       body: ListView(
         padding: EdgeInsets.symmetric(horizontal: 15),
