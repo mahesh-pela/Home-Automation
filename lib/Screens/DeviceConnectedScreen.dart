@@ -1,6 +1,8 @@
 import 'package:avatar_glow/avatar_glow.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:home_automation/constants/color.dart';
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
@@ -61,7 +63,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   }
 
   void _listen() async {
-    //stop porcupine to free up the microphone for speech recognition
+    // Stop Porcupine to free up the microphone for speech recognition
     await _porcupineManager?.stop();
 
     if (!_isListening) {
@@ -69,8 +71,8 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
         onStatus: (val) {
           print('onStatus: $val');
           if (val == 'notListening') {
-            setState(() => _isListening = false);// Stop animating when not listening
-            _restartPorcupine();  //restart porcupine after speech recognition ends
+            setState(() => _isListening = false); // Stop animating when not listening
+            _restartPorcupine();  // Restart Porcupine after speech recognition ends
           }
         },
         onError: (val) {
@@ -107,12 +109,11 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     }
   }
 
-  //restart Porcupine Code
-  void _restartPorcupine() async{
-    try{
+  void _restartPorcupine() async {
+    try {
       await _porcupineManager?.start();
       print('Porcupine restarted Successfully');
-    }catch(e){
+    } catch (e) {
       print('Error restarting Porcupine: $e');
     }
   }
@@ -128,12 +129,26 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     }
   }
 
+  void _handleLivingRoomLight(bool isSwitched) {
+    // Send the message to Bluetooth device when switch is toggled
+    if (isSwitched) {
+      _sendMessageToBluetooth('1'); // Turn on the light
+    } else {
+      _sendMessageToBluetooth('0'); // Turn off the light
+    }
+  }
+  void _handleLivingRoomFan(bool isSwitched){}
+  void _handleBedroomAC(bool isSwitched){}
+  void _handleBedroomTV(bool isSwitched){}
+  void _handleDiningRoomLight(bool isSwitched){}
+  void _handleDiningRoomAC(bool isSwitched){}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 30),
+        padding: const EdgeInsets.only(bottom: 20),
         child: AvatarGlow(
           animate: _isListening,
           duration: Duration(milliseconds: 2000),
@@ -144,7 +159,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
             child: CircleAvatar(
               backgroundColor: bgColor,
               radius: 35,
-              child: Icon(_isListening? Icons.mic: Icons.mic_none, color: Colors.white,),
+              child: Icon(_isListening ? Icons.mic : Icons.mic_none, color: Colors.white),
             ),
           ),
         ),
@@ -152,47 +167,32 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: Text('Devices', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 23, color: Colors.white)),
-            // Text('Connected to ${widget.device.name ?? "Unknown Device"}'),
       ),
-
-      ///----------------------------///
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        margin: EdgeInsets.only(bottom: 150),
-        child: Column(
-          children: [
-            Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _sendMessageToBluetooth('1');
-                      },
-                      child: Text('ON'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _sendMessageToBluetooth('0');
-                      },
-                      child: Text('OFF'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 30),
-            SizedBox(height: 20),
-            Text(
-              _command,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
+      body: ListView(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        children: [
+          RoomSection(
+            title: 'Living Room',
+            devices: [
+              DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'Living Room', onSwitchChanged: _handleLivingRoomLight),
+              DeviceCard(icon: FontAwesomeIcons.fan, label: 'Fan', subLabel: 'Living Room', onSwitchChanged: _handleLivingRoomFan),
+            ],
+          ),
+          RoomSection(
+            title: 'BedRoom',
+            devices: [
+              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'BedRoom', onSwitchChanged: _handleBedroomAC),
+              DeviceCard(icon: CupertinoIcons.tv, label: "Smart TV", subLabel: 'Bedroom', onSwitchChanged: _handleBedroomTV),
+            ],
+          ),
+          RoomSection(
+            title: 'Dining Room',
+            devices: [
+              DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'Dining Room', onSwitchChanged: _handleDiningRoomLight),
+              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'Dining Room', onSwitchChanged: _handleDiningRoomLight),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -202,5 +202,74 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     _porcupineManager?.stop(); // Stop Porcupine detection
     _porcupineManager?.delete(); // Free resources
     super.dispose();
+  }
+}
+
+class RoomSection extends StatelessWidget {
+  final String title;
+  final List<DeviceCard> devices;
+
+  RoomSection({super.key, required this.title, required this.devices});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 20),
+        Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: devices.map((device) => Expanded(child: device)).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class DeviceCard extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final String subLabel;
+  final ValueChanged<bool> onSwitchChanged;
+
+  const DeviceCard({super.key, required this.icon, required this.label, required this.subLabel, required this.onSwitchChanged});
+
+  @override
+  State<DeviceCard> createState() => _DeviceCardState();
+}
+
+class _DeviceCardState extends State<DeviceCard> {
+  bool isSwitched = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Color(0xFFE7F0F8),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(widget.icon, size: 40, color: Colors.black87),
+          SizedBox(height: 10),
+          Text(widget.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          SizedBox(height: 5),
+          Text(widget.subLabel, style: TextStyle(fontSize: 12, color: Colors.black54)),
+          SizedBox(height: 10),
+          CupertinoSwitch(
+              value: isSwitched,
+              onChanged: (value) {
+                setState(() => isSwitched = value);
+                widget.onSwitchChanged(isSwitched);
+              },
+            ),
+        ],
+      ),
+    );
   }
 }
