@@ -90,10 +90,20 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
           setState(() {
             _command = val.recognizedWords.toLowerCase();
             print('Command recognized: $_command');
-            if (_command.contains('turn on light')) {
-              _sendMessageToBluetooth('1'); // Turn on the LED
-            } else if (_command.contains('turn off light')) {
-              _sendMessageToBluetooth('0'); // Turn off the LED
+
+            //detect and control the living room light
+            if (_command.contains('turn on living room light')) {
+              _handleLivingRoomLight(true); // Turn on the LED
+            } else if (_command.contains('turn off living room light')) {
+              _handleLivingRoomLight(false); // Turn off the LED
+            }
+
+            //detect and control bedroom light
+            else if(_command.contains('turn on bedroom light')){
+              _handleBedroomLight(true);
+            }
+            else if(_command.contains('turn off bedroom light')){
+              _handleBedroomLight(false);
             }
           });
 
@@ -143,8 +153,15 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   }
   void _handleLivingRoomFan(bool isSwitched){}
   void _handleBedroomAC(bool isSwitched){}
-  void _handleBedroomTV(bool isSwitched){}
-  void _handleDiningRoomLight(bool isSwitched){}
+  void _handleBedroomLight(bool isSwitched){
+    if(isSwitched){
+      _sendMessageToBluetooth('3');
+    }
+    else{
+      _sendMessageToBluetooth('2');
+    }
+  }
+  void _handleDiningRoomSmartTV(bool isSwitched){}
   void _handleDiningRoomAC(bool isSwitched){}
 
   @override
@@ -192,17 +209,17 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
             ],
           ),
           RoomSection(
-            title: 'BedRoom',
+            title: 'Dining Room',
             devices: [
-              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'BedRoom', onSwitchChanged: _handleBedroomAC),
-              DeviceCard(icon: CupertinoIcons.tv, label: "Smart TV", subLabel: 'Bedroom', onSwitchChanged: _handleBedroomTV),
+              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'Dining Room', onSwitchChanged: _handleDiningRoomAC),
+              DeviceCard(icon: CupertinoIcons.tv, label: "Smart TV", subLabel: 'Dining Room', onSwitchChanged: _handleDiningRoomSmartTV),
             ],
           ),
           RoomSection(
-            title: 'Dining Room',
+            title: 'BedRoom',
             devices: [
-              DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'Dining Room', onSwitchChanged: _handleDiningRoomLight),
-              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'Dining Room', onSwitchChanged: _handleDiningRoomLight),
+              DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'BedRoom', onSwitchChanged: _handleBedroomLight),
+              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'BedRoom', onSwitchChanged: _handleBedroomAC),
             ],
           ),
         ],
