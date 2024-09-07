@@ -29,6 +29,10 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   bool _isListening = false;
   String _command = '';
 
+  //central state for changing the state of the switch on both voice and manual control
+  bool isLivingRoomLightOn = false;
+  bool isBedroomLightOn = false;
+
   @override
   void initState() {
     super.initState();
@@ -144,22 +148,19 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
 
   ///------- custom functions for controlling the devices for the rooms ------------///
   void _handleLivingRoomLight(bool isSwitched) {
+    setState(() {
+      isLivingRoomLightOn = isSwitched;
+    });
     // Send the message to Bluetooth device when switch is toggled
-    if (isSwitched) {
-      _sendMessageToBluetooth('1'); // Turn on the light
-    } else {
-      _sendMessageToBluetooth('0'); // Turn off the light
-    }
+    _sendMessageToBluetooth(isSwitched ?'1': '0');
   }
   void _handleLivingRoomFan(bool isSwitched){}
   void _handleBedroomAC(bool isSwitched){}
   void _handleBedroomLight(bool isSwitched){
-    if(isSwitched){
-      _sendMessageToBluetooth('3');
-    }
-    else{
-      _sendMessageToBluetooth('2');
-    }
+    setState(() {
+      isBedroomLightOn = isSwitched;
+    });
+    _sendMessageToBluetooth(isSwitched ? '3': '2');
   }
   void _handleDiningRoomSmartTV(bool isSwitched){}
   void _handleDiningRoomAC(bool isSwitched){}
@@ -204,22 +205,22 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
           RoomSection(
             title: 'Living Room',
             devices: [
-              DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'Living Room', onSwitchChanged: _handleLivingRoomLight),
-              DeviceCard(icon: FontAwesomeIcons.fan, label: 'Fan', subLabel: 'Living Room', onSwitchChanged: _handleLivingRoomFan),
+              DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'Living Room', isSwitched: isLivingRoomLightOn, onSwitchChanged: _handleLivingRoomLight),
+              DeviceCard(icon: FontAwesomeIcons.fan, label: 'Fan', subLabel: 'Living Room', isSwitched: false, onSwitchChanged: _handleLivingRoomFan),
             ],
           ),
           RoomSection(
             title: 'Dining Room',
             devices: [
-              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'Dining Room', onSwitchChanged: _handleDiningRoomAC),
-              DeviceCard(icon: CupertinoIcons.tv, label: "Smart TV", subLabel: 'Dining Room', onSwitchChanged: _handleDiningRoomSmartTV),
+              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'Dining Room', isSwitched : false, onSwitchChanged: _handleDiningRoomAC),
+              DeviceCard(icon: CupertinoIcons.tv, label: "Smart TV", subLabel: 'Dining Room', isSwitched: false, onSwitchChanged: _handleDiningRoomSmartTV),
             ],
           ),
           RoomSection(
             title: 'BedRoom',
             devices: [
-              DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'BedRoom', onSwitchChanged: _handleBedroomLight),
-              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'BedRoom', onSwitchChanged: _handleBedroomAC),
+              DeviceCard(icon: Icons.light, label: 'Light', subLabel: 'BedRoom', isSwitched: isBedroomLightOn, onSwitchChanged: _handleBedroomLight),
+              DeviceCard(icon: Icons.ac_unit, label: 'AC', subLabel: 'BedRoom', isSwitched: false, onSwitchChanged: _handleBedroomAC),
             ],
           ),
         ],
@@ -262,9 +263,10 @@ class DeviceCard extends StatefulWidget {
   final IconData icon;
   final String label;
   final String subLabel;
+  final bool isSwitched;
   final ValueChanged<bool> onSwitchChanged;
 
-  const DeviceCard({super.key, required this.icon, required this.label, required this.subLabel, required this.onSwitchChanged});
+  const DeviceCard({super.key, required this.icon, required this.label, required this.subLabel, required this.isSwitched, required this.onSwitchChanged});
 
   @override
   State<DeviceCard> createState() => _DeviceCardState();
@@ -292,11 +294,8 @@ class _DeviceCardState extends State<DeviceCard> {
           Text(widget.subLabel, style: TextStyle(fontSize: 12, color: Colors.black54)),
           SizedBox(height: 10),
           CupertinoSwitch(
-              value: isSwitched,
-              onChanged: (value) {
-                setState(() => isSwitched = value);
-                widget.onSwitchChanged(isSwitched);
-              },
+              value: widget.isSwitched,
+              onChanged: widget.onSwitchChanged,
             ),
         ],
       ),
