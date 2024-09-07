@@ -2,6 +2,7 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:home_automation/constants/color.dart';
 import 'dart:convert';
@@ -23,7 +24,7 @@ class DeviceConnectedScreen extends StatefulWidget {
 class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   // Access the BluetoothDevice Object if provided
   BluetoothDevice? get device => widget.device;
-
+  late FlutterTts _flutterTts;
   late stt.SpeechToText _speech;
   PorcupineManager? _porcupineManager;
   bool _isListening = false;
@@ -37,6 +38,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
+    _flutterTts = FlutterTts();
     _initializePorcupine();
   }
 
@@ -64,8 +66,13 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     }
   }
 
+  void _speak(String text) async{
+    await _flutterTts.speak(text);
+  }
+
   void _onWakeWordDetected(int keywordIndex) {
     print('Wake word detected!');
+    _speak("Hello Chief, how can i help you?"); //speak the greeting
     _listen(); // Start listening after wake word is detected
   }
 
@@ -97,16 +104,20 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
 
             //detect and control the living room light
             if (_command.contains('turn on living room light')) {
+              _speak("turning on living room light");
               _handleLivingRoomLight(true); // Turn on the LED
             } else if (_command.contains('turn off living room light')) {
+              _speak("turning off living room light");
               _handleLivingRoomLight(false); // Turn off the LED
             }
 
             //detect and control bedroom light
             else if(_command.contains('turn on bedroom light')){
+              _speak("turning on bedroom light");
               _handleBedroomLight(true);
             }
             else if(_command.contains('turn off bedroom light')){
+              _speak("turning off bedroom light");
               _handleBedroomLight(false);
             }
           });
