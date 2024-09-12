@@ -104,7 +104,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
 
             //detect and control the living room light
             if (_command.contains('turn on living room light')) {
-              _speak("turning on living room light");
+               _speak("turning on living room light");
               _handleLivingRoomLight(true); // Turn on the LED
             } else if (_command.contains('turn off living room light')) {
               _speak("turning off living room light");
@@ -123,7 +123,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
           });
 
           // After processing the command, reset the _command to an empty string
-          Future.delayed(Duration(seconds: 2), () {
+          Future.delayed(Duration(seconds: 1), () {
             setState(() {
               _command = ''; // Clear the command after 2 seconds
             });
