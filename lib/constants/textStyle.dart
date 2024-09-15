@@ -9,3 +9,11 @@ TextStyle textStyle18(){
     color: Colors.black
   );
 }
+
+TextStyle textStyle(){
+  return TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.bold,
+    fontFamily: ""
+  );
+}

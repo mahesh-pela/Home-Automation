@@ -11,6 +11,7 @@ import 'dart:typed_data';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:porcupine_flutter/porcupine_manager.dart';
 import 'BluetoothListScreen.dart';
+import 'package:home_automation/NavigationBar/bottomNavigation.dart';
 
 class DeviceConnectedScreen extends StatefulWidget {
   final BluetoothDevice? device;
@@ -236,6 +237,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: Bottomnavigation(),
     );
   }
 
@@ -246,6 +248,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     super.dispose();
   }
 }
+
 
 class RoomSection extends StatelessWidget {
   final String title;
@@ -310,6 +313,7 @@ class _DeviceCardState extends State<DeviceCard> {
             ),
         ],
       ),
+
     );
   }
 }
