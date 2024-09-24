@@ -45,14 +45,14 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
 
   void _initializePorcupine() async {
     try {
-      final String accessKey = "fC3yFbw1EPSuQyKdNcE9ava8GFNwy8Cw5WFdmY3JUC5+RF+p8kePaA==";
+      final String accessKey = "rHLhyxU7emnkTGmREwLS+kUL73163zC48qAZnFmCL8bg6y5XdqejBA==";
 
       // Check and request microphone permission
       if (await Permission.microphone.request().isGranted) {
         // Load the wake word model from the assets
         _porcupineManager = await PorcupineManager.fromKeywordPaths(
           accessKey, // Access key
-          ['assets/Hey-lyra_en_android_v3_0_0.ppn'], // Path to your wake word model in the assets folder
+          ['assets/Hey-Lyra_en_android_v3_0_0.ppn'], // Path to your wake word model in the assets folder
           _onWakeWordDetected, // Callback when wake word is detected
           sensitivities: [0.5], // Sensitivity level (optional)
         );
@@ -120,6 +120,16 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
             else if(_command.contains('turn off bedroom light')){
               _speak("turning off bedroom light");
               _handleBedroomLight(false);
+            }
+            else if(_command.contains('turn on light')){
+              _speak("turning on light");
+              _handleLivingRoomLight(true);
+              _handleBedroomLight(true);
+            }
+            else if(_command.contains('turn off light')){
+              _speak("turning off light");
+              _handleBedroomLight(false);
+              _handleLivingRoomLight(false);
             }
           });
 
@@ -237,7 +247,7 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: Bottomnavigation(),
+      // bottomNavigationBar: Bottomnavigation(),
     );
   }
 
