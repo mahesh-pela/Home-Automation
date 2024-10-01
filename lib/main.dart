@@ -1,10 +1,19 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_automation/Screens/BluetoothListScreen.dart';
 import 'package:home_automation/Screens/DeviceConnectedScreen.dart';
 import 'package:home_automation/Screens/loginScreen.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: FirebaseOptions(
+        apiKey: "AIzaSyADVJpLDJaOER3HGLrUqoBffLDfbnwAYu0",
+        appId: "1:460827358926:android:11d2e5ab84f21ee959429f",
+        messagingSenderId: "460827358926",
+        projectId: "homeautomation-5391a")
+  );
   runApp(const MyApp());
 }
 

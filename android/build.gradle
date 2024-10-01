@@ -5,9 +5,11 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.4.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21" // Ensure this is present
+        classpath 'com.google.gms:google-services:4.3.15' // Corrected dependency
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21"
     }
 }
+
 allprojects {
     repositories {
         google()

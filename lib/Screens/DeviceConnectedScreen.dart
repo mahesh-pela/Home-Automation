@@ -1,4 +1,5 @@
 import 'package:avatar_glow/avatar_glow.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -23,6 +24,8 @@ class DeviceConnectedScreen extends StatefulWidget {
 }
 
 class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
+  FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+
   // Access the BluetoothDevice Object if provided
   BluetoothDevice? get device => widget.device;
   late FlutterTts _flutterTts;
@@ -34,6 +37,23 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   //central state for changing the state of the switch on both voice and manual control
   bool isLivingRoomLightOn = false;
   bool isBedroomLightOn = false;
+
+  void _logDeviceState(String room, String device, bool isOn) async{
+    try{
+      await _firebaseFirestore.collection('device_logs').add({
+        'room': room,
+        'device': device,
+        'state' : isOn ? 'on' : 'off',
+        'timestamp': FieldValue.serverTimestamp(),
+
+        // 'device_id': device?.id ?? 'unknown',
+      });
+      print('Firebase initialized successfully');
+      print('Logged $device in $room as ${isOn ? 'on' :'off'}');
+    }catch(e){
+      print('Error initializing Firebase: $e');
+    }
+  }
 
   @override
   void initState() {
@@ -175,7 +195,11 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
     });
     // Send the message to Bluetooth device when switch is toggled
     _sendMessageToBluetooth(isSwitched ?'1': '0');
+
+    //log the state change to firestore
+    _logDeviceState('Living Room', 'Light', isSwitched);
   }
+
   void _handleLivingRoomFan(bool isSwitched){}
   void _handleBedroomAC(bool isSwitched){}
   void _handleBedroomLight(bool isSwitched){
@@ -183,6 +207,10 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
       isBedroomLightOn = isSwitched;
     });
     _sendMessageToBluetooth(isSwitched ? '3': '2');
+
+    //log the state change to Firestore
+    _logDeviceState('Bedroom', 'Light', isSwitched);
+
   }
   void _handleDiningRoomSmartTV(bool isSwitched){}
   void _handleDiningRoomAC(bool isSwitched){}
@@ -191,20 +219,17 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: AvatarGlow(
-          animate: _isListening,
-          duration: Duration(milliseconds: 2000),
-          glowColor: bgColor,
-          repeat: true,
-          child: GestureDetector(
-            onTap: _listen,
-            child: CircleAvatar(
-              backgroundColor: bgColor,
-              radius: 35,
-              child: Icon(_isListening ? Icons.mic : Icons.mic_none, color: Colors.white),
-            ),
+      floatingActionButton: AvatarGlow(
+        animate: _isListening,
+        duration: Duration(milliseconds: 2000),
+        glowColor: bgColor,
+        repeat: true,
+        child: GestureDetector(
+          onTap: _listen,
+          child: CircleAvatar(
+            backgroundColor: bgColor,
+            radius: 35,
+            child: Icon(_isListening ? Icons.mic : Icons.mic_none, color: Colors.white),
           ),
         ),
       ),

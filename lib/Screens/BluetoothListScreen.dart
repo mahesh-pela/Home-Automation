@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:home_automation/NavigationBar/bottomNavigation.dart';
 import 'package:home_automation/constants/color.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'DeviceConnectedScreen.dart';
@@ -137,7 +138,7 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => DeviceConnectedScreen(device: device),
+            builder: (context) => Bottomnavigation(),
           ),
         );
         print('Connected to ${device.name}');
