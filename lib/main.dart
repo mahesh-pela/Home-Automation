@@ -1,9 +1,13 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_automation/NavigationBar/bottomNavigation.dart';
 import 'package:home_automation/Screens/BluetoothListScreen.dart';
 import 'package:home_automation/Screens/DeviceConnectedScreen.dart';
 import 'package:home_automation/Screens/loginScreen.dart';
+
+import 'Screens/doorLockLogs.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +18,13 @@ void main() async{
         messagingSenderId: "460827358926",
         projectId: "homeautomation-5391a")
   );
-  runApp(const MyApp());
+
+  runApp(
+      // DevicePreview(
+      // builder: (context) =>
+    MyApp()
+    // )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -29,7 +39,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(),
         primarySwatch: Colors.blue,
       ),
-      home: BluetoothListScreen(),
+      home: Bottomnavigation(),
     );
 
   }

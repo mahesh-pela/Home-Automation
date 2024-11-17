@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:home_automation/Screens/DeviceConnectedScreen.dart';
+import 'package:home_automation/Screens/doorLockLogs.dart';
 import 'package:home_automation/Screens/homeScreen.dart';
 import 'package:home_automation/Screens/logScreen.dart';
 
@@ -16,7 +17,8 @@ class _BottomnavigationState extends State<Bottomnavigation> {
 
   static List<Widget> _widgetOptions = <Widget>[
     DeviceConnectedScreen(),
-    LogScreen()
+    LogScreen(),
+    Doorlocklogs()
   ];
 
   void _onItemTapped(int index){
@@ -40,7 +42,11 @@ class _BottomnavigationState extends State<Bottomnavigation> {
               ),
               BottomNavigationBarItem(
                   icon: Icon(Icons.event_note),
-                  label: 'Logs',
+                  label: 'Appliances Logs',
+              ),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.event_note),
+                  label: 'Door Logs',
               ),
               // BottomNavigationBarItem(
               //     icon: Icon(CupertinoIcons.profile_circled),

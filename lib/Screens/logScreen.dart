@@ -11,15 +11,15 @@ class LogScreen extends StatefulWidget {
 }
 
 class _LogScreenState extends State<LogScreen> {
-  List<Map<String, dynamic>> deviceLogs = []; // List to store device logs
+  List<Map<String, dynamic>> doorLogs = []; // List to store device logs
 
   @override
   void initState() {
     super.initState();
-    fetchDeviceLogs();
+    fetchdoorLogs();
   }
 
-  Future<void> fetchDeviceLogs() async {
+  Future<void> fetchdoorLogs() async {
     // Get all documents from the 'device_logs' collection, ordered by the timestamp in descending order
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection("device_logs")
@@ -28,7 +28,7 @@ class _LogScreenState extends State<LogScreen> {
 
     if (querySnapshot.docs.isNotEmpty) {
       // Clear the list before adding new data
-      deviceLogs.clear();
+      doorLogs.clear();
 
       // Iterate through all the documents in the collection
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
@@ -42,7 +42,7 @@ class _LogScreenState extends State<LogScreen> {
         DateTime dateTime = timestamp.toDate();
 
         // Store the fetched data in a map, including the document ID for deletion
-        deviceLogs.add({
+        doorLogs.add({
           'device': device,
           'room': room,
           'state': state,
@@ -67,7 +67,7 @@ class _LogScreenState extends State<LogScreen> {
   Future<void> deleteLog(String docId) async {
     await FirebaseFirestore.instance.collection("device_logs").doc(docId).delete();
     // After deleting, refresh the logs
-    fetchDeviceLogs();
+    fetchdoorLogs();
   }
 
   @override
@@ -76,13 +76,13 @@ class _LogScreenState extends State<LogScreen> {
       appBar: AppBar(
         title: Text('Logs'),
       ),
-      body: deviceLogs.isEmpty
+      body: doorLogs.isEmpty
           ? Center(child: CircularProgressIndicator()) // Show loader until data is fetched
           : ListView.builder(
-        itemCount: deviceLogs.length, // Set the length of the list
+        itemCount: doorLogs.length, // Set the length of the list
         itemBuilder: (context, index) {
           // Fetch the corresponding device log
-          Map<String, dynamic> log = deviceLogs[index];
+          Map<String, dynamic> log = doorLogs[index];
 
           return Dismissible(
             key: Key(log['id']), // Unique key for each Dismissible widget (document ID)
