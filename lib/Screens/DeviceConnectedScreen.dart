@@ -12,7 +12,6 @@ import 'dart:typed_data';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:porcupine_flutter/porcupine_manager.dart';
 import 'BluetoothListScreen.dart';
-import 'package:home_automation/NavigationBar/bottomNavigation.dart';
 
 class DeviceConnectedScreen extends StatefulWidget {
   final BluetoothDevice? device;
@@ -65,14 +64,14 @@ class _DeviceConnectedScreenState extends State<DeviceConnectedScreen> {
 
   void _initializePorcupine() async {
     try {
-      final String accessKey = "rHLhyxU7emnkTGmREwLS+kUL73163zC48qAZnFmCL8bg6y5XdqejBA==";
+      final String accessKey = "+4XZgMd8+n/IkEaUMf/Cq0ioWixr3rlIu7uTrhS8CvsVyJXjAcm44Q==";
 
       // Check and request microphone permission
       if (await Permission.microphone.request().isGranted) {
         // Load the wake word model from the assets
         _porcupineManager = await PorcupineManager.fromKeywordPaths(
           accessKey, // Access key
-          ['assets/Hey-Lyra_en_android_v3_0_0.ppn'], // Path to your wake word model in the assets folder
+          ['assets/hey-lyra_en_android_v3_0_0.ppn'], // Path to your wake word model in the assets folder
           _onWakeWordDetected, // Callback when wake word is detected
           sensitivities: [0.5], // Sensitivity level (optional)
         );
