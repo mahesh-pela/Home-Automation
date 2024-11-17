@@ -18,7 +18,7 @@ class _DoorlocklogsState extends State<Doorlocklogs> {
   // GitHub API details
   final String owner = "mahesh-pela";
   final String repo = "github_Storage";
-  final String token = "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"; // Replace with secure storage
+  final String token = ""; // Replace with secure storage
   final String baseUrl = "https://api.github.com";
 
   @override
