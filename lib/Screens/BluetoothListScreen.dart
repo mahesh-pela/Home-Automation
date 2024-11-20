@@ -206,20 +206,20 @@ class _BluetoothListScreenState extends State<BluetoothListScreen> {
           ),
           Expanded(
             child: isSwitch
-                    ? ListView.builder(
-                  itemCount: _devicesList.length,
-                  itemBuilder: (context, index) {
-                    BluetoothDevice device = _devicesList[index];
-                    return ListTile(
-                      title: Text(device.name ?? "Unknown Device"),
-                      subtitle: Text(device.address),
-                      onTap: () => _connectToDevice(device),
-                    );
-                  },
-                )
-                    : Center(
-                  child: Text('Bluetooth is Off'),
-                ),
+                ? ListView.builder(
+              itemCount: _devicesList.length,
+              itemBuilder: (context, index) {
+                BluetoothDevice device = _devicesList[index];
+                return ListTile(
+                  title: Text(device.name ?? "Unknown Device"),
+                  subtitle: Text(device.address),
+                  onTap: () => _connectToDevice(device),
+                );
+              },
+            )
+                : Center(
+              child: Text('Bluetooth is Off'),
+            ),
           ),
         ],
       ),
