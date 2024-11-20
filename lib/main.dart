@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(),
         primarySwatch: Colors.blue,
       ),
-      home: BluetoothListScreen(),
+      home: Bottomnavigation(),
     );
 
   }
