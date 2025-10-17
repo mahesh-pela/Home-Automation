@@ -37,35 +37,43 @@ Picovoice account and API key (Sign up)
 🔧 Steps to Run the Project
 
 1. Clone the Repository
+
 git clone https://github.com/yourusername/home_automation.git
 cd home_automation
 
 2. Install Dependencies
+
 flutter pub get
 
 3. Configure Picovoice
+
 Create an account on Picovoice
   Obtain your Access Key.
   Add it to your Flutter project (usually in a .env or config file).
 
 4. Upload Arduino Code
+
 Open the corresponding Arduino sketch file (home_automation_arduino.ino).
 Connect your Arduino board.
 Upload the code through Arduino IDE.
 Ensure your HC-05 module is correctly wired (RX/TX pins).
 
 5. Pair Bluetooth Device
+
 On your mobile phone, pair with the HC-05 module (default PIN: 1234 or 0000).
 
 6. Run the Flutter App
+
 flutter run
 
 7. Connect and Control
+
 Open the app and tap Connect Bluetooth.
 Once connected, control appliances manually or use the wake word + voice commands.
 
 🎙️ Voice Commands Example
 Command	Action
+
 “Turn on light”	Turns on the light
 “Turn off fan”	Turns off the fan
 “Turn off all”	Turns off all appliances
