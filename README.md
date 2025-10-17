@@ -4,6 +4,7 @@ A Flutter-based Home Automation System that allows users to control home applian
 The app also includes voice control capabilities with a wake word detection system powered by Picovoice Porcupine.
 
 🚀 Features
+
 🔗 Bluetooth Connectivity – Connects your phone to an HC-05 module for wireless communication.
 💡 Device Control – Turn ON/OFF home appliances directly from the app.
 🎤 Voice Commands – Control devices using voice recognition.
@@ -11,14 +12,15 @@ The app also includes voice control capabilities with a wake word detection syst
 🧭 User-Friendly Interface – Simple and clean UI built with Flutter’s Material Design.
 
 🛠️ Tech Stack
-Component	Technology Used
+
 Frontend	Flutter (Dart)
-Hardware	Arduino UNO / Mega
+Hardware	Arduino UNO 
 Communication	HC-05 Bluetooth Module
 Voice Detection	Picovoice Porcupine SDK
 IDE	Android Studio / VS Code
 
 🧩 System Architecture
+
 The Flutter app connects to the HC-05 Bluetooth module.
 The Arduino interprets incoming commands from Bluetooth and toggles connected appliances (e.g., lights, fans, etc.).
 The app’s voice module uses Porcupine SDK to detect the wake word.
@@ -26,12 +28,14 @@ Upon wake word detection, it activates speech recognition to execute control com
 
 ⚙️ Setup Instructions
 🧰 Prerequisites
+
 Flutter SDK installed
 Arduino IDE installed
 HC-05 Bluetooth Module configured and paired with your phone
 Picovoice account and API key (Sign up)
 
 🔧 Steps to Run the Project
+
 1. Clone the Repository
 git clone https://github.com/yourusername/home_automation.git
 cd home_automation
